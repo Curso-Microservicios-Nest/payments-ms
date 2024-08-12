@@ -6,8 +6,8 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-payment-session')
-  createPaymentSession() {
-    return 'Payment session created';
+  async createPaymentSession() {
+    return await this.paymentsService.generateAccessToken();
   }
 
   @Get('success')
