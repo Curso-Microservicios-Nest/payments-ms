@@ -5,9 +5,14 @@ import { PaymentsService } from './payments.service';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Post('create-payment-session')
+  @Post('generate-access-token')
   async createPaymentSession() {
     return await this.paymentsService.generateAccessToken();
+  }
+
+  @Post('create-order')
+  async createOrder() {
+    return await this.paymentsService.createOrder();
   }
 
   @Get('success')

@@ -3,6 +3,7 @@ import * as joi from 'joi';
 
 interface EnvVars {
   PORT: number;
+  BASE_URL: string;
   PAYPAL_BASE_URL: string;
   PAYPAL_CLIENT_ID: string;
   PAYPAL_SECRET: string;
@@ -11,6 +12,7 @@ interface EnvVars {
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
+    BASE_URL: joi.string().required(),
     PAYPAL_BASE_URL: joi.string().required(),
     PAYPAL_CLIENT_ID: joi.string().required(),
     PAYPAL_SECRET: joi.string().required(),
@@ -29,6 +31,7 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
+  baseUrl: envVars.BASE_URL,
   paypal: {
     baseUrl: envVars.PAYPAL_BASE_URL,
     clientId: envVars.PAYPAL_CLIENT_ID,

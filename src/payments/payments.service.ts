@@ -33,10 +33,66 @@ export class PaymentsService {
         this.httpService.post(url, data, config),
       );
       this.logger.log('Token de PayPal obtenido exitosamente.');
-      return response.data;
+      return response.data.access_token;
     } catch (error) {
       this.logger.error('Error al obtener el token de PayPal:', error.message);
       throw new Error('Error al obtener el token de PayPal');
+    }
+  }
+
+  async createOrder() {
+    const { baseUrl, paypal } = envs;
+    const accessToken = await this.generateAccessToken();
+    console.log('accessToken', accessToken);
+
+    const url = `${paypal.baseUrl}/v2/checkout/orders`;
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const body = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          reference_id: 'd9f80740-38f0-11e8-b467-0ed5f89f718b',
+          description: 'Smartphone Purchase',
+          amount: { currency_code: 'USD', value: '100.00' },
+        },
+        {
+          reference_id: 'd9f80741-38f0-11e8-b467-0ed5f89f718b',
+          description: 'Technology Purchase',
+          amount: { currency_code: 'USD', value: '50.00' },
+        },
+      ],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
+            brand_name: 'EXAMPLE INC',
+            locale: 'en-US',
+            landing_page: 'LOGIN',
+            shipping_preference: 'NO_SHIPPING',
+            user_action: 'PAY_NOW',
+            return_url: `${baseUrl}/returnUrl`,
+            cancel_url: `${baseUrl}/cancelUrl`,
+          },
+        },
+      },
+    };
+
+    const config: AxiosRequestConfig = {
+      headers,
+    };
+
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post(url, body, config),
+      );
+      this.logger.log('Orden de PayPal creada exitosamente.');
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error al crear la orden de PayPal:', error.message);
+      throw new Error('Error al crear la orden de PayPal');
     }
   }
 }
