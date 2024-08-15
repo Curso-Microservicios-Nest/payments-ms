@@ -5,17 +5,13 @@ import { PaymentsService } from './payments.service';
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
-  @Post('generate-access-token')
-  async createPaymentSession() {
-    return await this.paymentsService.generateAccessToken();
-  }
-
   @Post('create-order')
   async createOrder() {
-    return await this.paymentsService.createOrder();
+    const orderLink = await this.paymentsService.createOrder();
+    return { redirect: orderLink };
   }
 
-  @Get('success')
+  @Get('complete-order')
   success() {
     return {
       ok: true,
@@ -23,7 +19,7 @@ export class PaymentsController {
     };
   }
 
-  @Get('cancel')
+  @Get('cancel-order')
   cancel() {
     return {
       ok: false,

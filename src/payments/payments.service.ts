@@ -11,9 +11,8 @@ export class PaymentsService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  async generateAccessToken() {
+  private async generateAccessToken() {
     const { paypal } = envs;
-
     const url = `${paypal.baseUrl}/v1/oauth2/token`;
     const auth = {
       username: paypal.clientId,
@@ -27,7 +26,6 @@ export class PaymentsService {
       auth,
       headers,
     };
-
     try {
       const response = await lastValueFrom(
         this.httpService.post(url, data, config),
@@ -43,7 +41,6 @@ export class PaymentsService {
   async createOrder() {
     const { baseUrl, paypal } = envs;
     const accessToken = await this.generateAccessToken();
-    console.log('accessToken', accessToken);
 
     const url = `${paypal.baseUrl}/v2/checkout/orders`;
     const headers = {
@@ -68,28 +65,28 @@ export class PaymentsService {
         paypal: {
           experience_context: {
             payment_method_preference: 'IMMEDIATE_PAYMENT_REQUIRED',
-            brand_name: 'EXAMPLE INC',
+            brand_name: 'POWER SHOP INC',
             locale: 'en-US',
             landing_page: 'LOGIN',
             shipping_preference: 'NO_SHIPPING',
             user_action: 'PAY_NOW',
-            return_url: `${baseUrl}/returnUrl`,
-            cancel_url: `${baseUrl}/cancelUrl`,
+            return_url: `${baseUrl}/payments/complete-order`,
+            cancel_url: `${baseUrl}/payments/cancel-order`,
           },
         },
       },
     };
-
     const config: AxiosRequestConfig = {
       headers,
     };
-
     try {
       const response = await lastValueFrom(
         this.httpService.post(url, body, config),
       );
       this.logger.log('Orden de PayPal creada exitosamente.');
-      return response.data;
+      return response.data.links.find(
+        (link: { rel: string }) => link.rel === 'payer-action',
+      ).href;
     } catch (error) {
       this.logger.error('Error al crear la orden de PayPal:', error.message);
       throw new Error('Error al crear la orden de PayPal');
