@@ -1,14 +1,15 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { PaymentsService } from './payments.service';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create-order')
-  async createOrder() {
-    const orderLink = await this.paymentsService.createOrder();
+  async createOrder(@Body() createOrder: CreateOrderDto) {
+    const orderLink = await this.paymentsService.createOrder(createOrder);
     return { redirect: orderLink };
   }
 

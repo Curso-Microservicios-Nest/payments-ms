@@ -4,6 +4,7 @@ import { AxiosRequestConfig } from 'axios';
 import { lastValueFrom } from 'rxjs';
 
 import { envs } from 'src/config';
+import { CreateOrderDto } from './dto/create-order.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -38,7 +39,21 @@ export class PaymentsService {
     }
   }
 
-  async createOrder() {
+  async createOrder(data: CreateOrderDto) {
+    const { currency, items } = data;
+    const itemsPayload = items.map((item) => ({
+      name: item.name,
+      quantity: item.quantity,
+      unit_amount: {
+        currency_code: currency,
+        value: item.price,
+      },
+    }));
+    const totalItems = items.reduce(
+      (acc, item) => acc + Number(item.price) * Number(item.quantity),
+      0,
+    );
+
     const { baseUrl, paypal } = envs;
     const accessToken = await this.generateAccessToken();
 
@@ -51,14 +66,15 @@ export class PaymentsService {
       intent: 'CAPTURE',
       purchase_units: [
         {
-          reference_id: 'd9f80740-38f0-11e8-b467-0ed5f89f718b',
-          description: 'Smartphone Purchase',
-          amount: { currency_code: 'USD', value: '100.00' },
-        },
-        {
-          reference_id: 'd9f80741-38f0-11e8-b467-0ed5f89f718b',
-          description: 'Technology Purchase',
-          amount: { currency_code: 'USD', value: '50.00' },
+          description: 'Compra de productos',
+          items: itemsPayload,
+          amount: {
+            currency_code: currency,
+            value: totalItems,
+            breakdown: {
+              item_total: { currency_code: currency, value: totalItems },
+            },
+          },
         },
       ],
       payment_source: {
@@ -86,7 +102,7 @@ export class PaymentsService {
         (link: { rel: string }) => link.rel === 'payer-action',
       ).href;
     } catch (error) {
-      this.logger.error('Error al crear la orden de PayPal:', error.message);
+      this.logger.error('Error al crear la orden de PayPal:', error);
       throw new Error('Error al crear la orden de PayPal');
     }
   }
