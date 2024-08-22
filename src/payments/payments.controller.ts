@@ -1,4 +1,5 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
+
 import { PaymentsService } from './payments.service';
 
 @Controller('payments')
@@ -12,19 +13,17 @@ export class PaymentsController {
   }
 
   @Get('complete-order')
-  success() {
+  async success(@Query('token') token: string) {
+    const order = await this.paymentsService.captureOrder(token);
     return {
-      ok: true,
       message: 'Payment successful',
+      data: { status: order.status, payer: order.payer },
     };
   }
 
   @Get('cancel-order')
   cancel() {
-    return {
-      ok: false,
-      message: 'Payment cancelled',
-    };
+    return { message: 'Payment cancelled' };
   }
 
   @Post('webhook')

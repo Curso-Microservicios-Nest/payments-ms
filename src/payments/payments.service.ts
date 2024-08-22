@@ -76,9 +76,7 @@ export class PaymentsService {
         },
       },
     };
-    const config: AxiosRequestConfig = {
-      headers,
-    };
+    const config: AxiosRequestConfig = { headers };
     try {
       const response = await lastValueFrom(
         this.httpService.post(url, body, config),
@@ -90,6 +88,27 @@ export class PaymentsService {
     } catch (error) {
       this.logger.error('Error al crear la orden de PayPal:', error.message);
       throw new Error('Error al crear la orden de PayPal');
+    }
+  }
+
+  async captureOrder(orderId: string) {
+    const accessToken = await this.generateAccessToken();
+
+    const url = `${envs.paypal.baseUrl}/v2/checkout/orders/${orderId}/capture`;
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const config: AxiosRequestConfig = { headers };
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post(url, null, config),
+      );
+      this.logger.log('Orden de PayPal capturada exitosamente.');
+      return response.data;
+    } catch (error) {
+      this.logger.error('Error al capturar la orden de PayPal:', error.message);
+      throw new Error('Error al capturar la orden de PayPal');
     }
   }
 }
