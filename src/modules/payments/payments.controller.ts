@@ -1,21 +1,21 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
-import { PaymentsService } from './payments.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { OrdersService } from './services/orders.service';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly paymentsService: PaymentsService) {}
+  constructor(private readonly ordersService: OrdersService) {}
 
   @Post('create-order')
   async createOrder(@Body() createOrder: CreateOrderDto) {
-    const orderLink = await this.paymentsService.createOrder(createOrder);
+    const orderLink = await this.ordersService.createOrder(createOrder);
     return { redirect: orderLink };
   }
 
   @Get('complete-order')
   async success(@Query('token') token: string) {
-    const order = await this.paymentsService.captureOrder(token);
+    const order = await this.ordersService.captureOrder(token);
     return {
       message: 'Payment successful',
       data: { status: order.status, payer: order.payer },

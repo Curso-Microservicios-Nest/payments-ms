@@ -7,7 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-import { ItemPaymentDto } from './item-payment.dto';
+import { ItemPaymentDto } from 'src/modules/payments/dto/item-payment.dto';
 
 export class CreateOrderDto {
   @IsString()
