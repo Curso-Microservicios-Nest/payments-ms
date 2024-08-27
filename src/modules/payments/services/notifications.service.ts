@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 
 import { envs } from 'src/config';
@@ -24,10 +24,7 @@ export class NotificationsService {
     const url = `${envs.paypal.baseUrl}/v1/notifications/webhooks`;
     const body = {
       url: `${envs.baseUrl}/payments/webhook_paypal`,
-      event_types: [
-        { name: 'PAYMENT.AUTHORIZATION.CREATED' },
-        { name: 'PAYMENT.AUTHORIZATION.VOIDED' },
-      ],
+      event_types: [{ name: 'PAYMENT.CAPTURE.COMPLETED' }],
     };
     const config = createAxiosConfig(accessToken);
     try {
@@ -55,6 +52,29 @@ export class NotificationsService {
       return response.data;
     } catch (error) {
       handleHttpError(error, this.logger);
+    }
+  }
+
+  /**
+   * Permite eliminar un webhook de PayPal.
+   * @param webhookId ID del webhook.
+   */
+  async deleteWebhook(webhookId: string) {
+    const accessToken = await this.authService.generateAccessToken();
+    const url = `${envs.paypal.baseUrl}/v1/notifications/webhooks/${webhookId}`;
+    const config = createAxiosConfig(accessToken);
+    try {
+      await lastValueFrom(this.httpService.delete(url, config));
+      this.logger.log(`Webhook con ID ${webhookId} eliminado exitosamente.`);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        this.logger.warn(`Webhook con ID ${webhookId} no encontrado.`);
+        throw new NotFoundException(
+          `Webhook con ID ${webhookId} no encontrado.`,
+        );
+      } else {
+        handleHttpError(error, this.logger);
+      }
     }
   }
 }

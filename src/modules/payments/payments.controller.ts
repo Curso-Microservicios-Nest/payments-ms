@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
 import { NotificationsService } from './services/notifications.service';
@@ -38,8 +46,13 @@ export class PaymentsController {
   }
 
   @Get('webhooks')
-  async getWebhooks() {
-    const webhooks = await this.notificationsService.getWebhooks();
-    return { webhooks };
+  getWebhooks() {
+    return this.notificationsService.getWebhooks();
+  }
+
+  @Delete('webhooks/:id')
+  async deleteWebhooks(@Param('id') id: string) {
+    await this.notificationsService.deleteWebhook(id);
+    return { message: 'Webhook deleted' };
   }
 }

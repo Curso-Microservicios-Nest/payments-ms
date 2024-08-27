@@ -1,0 +1,9 @@
+export const createWebhookPayload = () => {
+  return {
+    url: 'https://example.com/example_webhook',
+    event_types: [
+      { name: 'PAYMENT.AUTHORIZATION.CREATED' },
+      { name: 'PAYMENT.AUTHORIZATION.VOIDED' },
+    ],
+  };
+};

@@ -12,6 +12,6 @@ export function createAxiosConfig(token: string): AxiosRequestConfig {
 }
 
 export function handleHttpError(error: any, logger: Logger) {
-  logger.error('Error during HTTP request:', error);
+  logger.error('Error during HTTP request:', error.message);
   throw new Error('Error during HTTP request');
 }
