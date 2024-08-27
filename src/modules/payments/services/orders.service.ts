@@ -16,6 +16,11 @@ export class OrdersService {
     private readonly authService: AuthService,
   ) {}
 
+  /**
+   * Permite crear una orden de PayPal.
+   * @param data Datos de la orden.
+   * @returns URL de redirección para completar la orden.
+   */
   async createOrder(data: CreateOrderDto) {
     const accessToken = await this.authService.generateAccessToken();
     const url = `${envs.paypal.baseUrl}/v2/checkout/orders`;
@@ -34,7 +39,11 @@ export class OrdersService {
     }
   }
 
-  // Method to capture an order
+  /**
+   * Permite capturar una orden de PayPal.
+   * @param orderId ID de la orden.
+   * @returns Datos de la orden capturada.
+   */
   async captureOrder(orderId: string) {
     const accessToken = await this.authService.generateAccessToken();
     const url = `${envs.paypal.baseUrl}/v2/checkout/orders/${orderId}/capture`;

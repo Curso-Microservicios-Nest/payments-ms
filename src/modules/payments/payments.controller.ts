@@ -1,11 +1,15 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
+import { NotificationsService } from './services/notifications.service';
 import { OrdersService } from './services/orders.service';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   @Post('create-order')
   async createOrder(@Body() createOrder: CreateOrderDto) {
@@ -27,8 +31,15 @@ export class PaymentsController {
     return { message: 'Payment cancelled' };
   }
 
-  @Post('webhook')
-  stripeWebhook() {
-    return 'Stripe webhook received';
+  @Post('webhooks')
+  async stripeWebhook() {
+    const webhook = await this.notificationsService.createWebhook();
+    return { webhook };
+  }
+
+  @Get('webhooks')
+  async getWebhooks() {
+    const webhooks = await this.notificationsService.getWebhooks();
+    return { webhooks };
   }
 }
