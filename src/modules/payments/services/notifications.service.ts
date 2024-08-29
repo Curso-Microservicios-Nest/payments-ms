@@ -23,7 +23,7 @@ export class NotificationsService {
     const accessToken = await this.authService.generateAccessToken();
     const url = `${envs.paypal.baseUrl}/v1/notifications/webhooks`;
     const body = {
-      url: `${envs.baseUrl}/payments/webhook_paypal`,
+      url: `${envs.baseUrl}/payments/payment-notification`,
       event_types: [{ name: 'PAYMENT.CAPTURE.COMPLETED' }],
     };
     const config = createAxiosConfig(accessToken);
