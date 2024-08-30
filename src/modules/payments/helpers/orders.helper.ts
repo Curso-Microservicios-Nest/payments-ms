@@ -2,7 +2,7 @@ import { envs } from 'src/config';
 import { CreateOrderDto } from '../dto/create-order.dto';
 
 export const createOrderPayload = (data: CreateOrderDto) => {
-  const { currency, items } = data;
+  const { currency, items, orderId } = data;
   const itemsPayload = items.map((item) => ({
     name: item.name,
     quantity: item.quantity,
@@ -16,6 +16,7 @@ export const createOrderPayload = (data: CreateOrderDto) => {
     intent: 'CAPTURE',
     purchase_units: [
       {
+        custom_id: orderId,
         description: 'Compra de productos',
         items: itemsPayload,
         amount: {
