@@ -12,8 +12,8 @@ interface EnvVars {
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
-    BASE_URL: joi.string().required(),
-    PAYPAL_BASE_URL: joi.string().required(),
+    BASE_URL: joi.string().uri().required(),
+    PAYPAL_BASE_URL: joi.string().uri().required(),
     PAYPAL_CLIENT_ID: joi.string().required(),
     PAYPAL_SECRET: joi.string().required(),
   })
