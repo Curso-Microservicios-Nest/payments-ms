@@ -3,6 +3,7 @@ import * as joi from 'joi';
 
 interface EnvVars {
   PORT: number;
+  NATS_SERVERS: string[];
   BASE_URL: string;
   PAYPAL_BASE_URL: string;
   PAYPAL_CLIENT_ID: string;
@@ -12,6 +13,7 @@ interface EnvVars {
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
     BASE_URL: joi.string().uri().required(),
     PAYPAL_BASE_URL: joi.string().uri().required(),
     PAYPAL_CLIENT_ID: joi.string().required(),
@@ -21,6 +23,7 @@ const envsSchema = joi
 
 const { error, value } = envsSchema.validate({
   ...process.env,
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(','),
 });
 
 if (error) {
@@ -31,6 +34,7 @@ const envVars: EnvVars = value;
 
 export const envs = {
   port: envVars.PORT,
+  natsServers: envVars.NATS_SERVERS,
   baseUrl: envVars.BASE_URL,
   paypal: {
     baseUrl: envVars.PAYPAL_BASE_URL,
