@@ -10,6 +10,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -24,7 +25,6 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
   await app.listen(envs.port);
-
-  logger.log(`🚀 Payments-ms running on PORT: ${envs.port}`);
+  logger.log(`🚀 Running on PORT: ${envs.port}`);
 }
 bootstrap();
