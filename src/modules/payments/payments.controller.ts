@@ -3,17 +3,27 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Query,
 } from '@nestjs/common';
 
+import {
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { NotificationsService } from './services/notifications.service';
 import { OrdersService } from './services/orders.service';
 import { PaymentsService } from './services/payments.service';
 
 @Controller('payments')
+@ApiTags('Payments')
 export class PaymentsController {
   constructor(
     private readonly ordersService: OrdersService,
@@ -27,6 +37,8 @@ export class PaymentsController {
    * @returns URL de redirección para completar la orden.
    */
   @Post('create-order')
+  @ApiOperation({ summary: 'Create a new order' })
+  @ApiCreatedResponse({ description: 'Order created successfully' })
   async createOrder(@Body() createOrder: CreateOrderDto) {
     const orderLink = await this.ordersService.createOrder(createOrder);
     return { redirect: orderLink };
@@ -38,6 +50,9 @@ export class PaymentsController {
    * @returns Mensaje de éxito.
    */
   @Get('complete-order')
+  @ApiOperation({ summary: 'Order completed' })
+  @ApiCreatedResponse({ description: 'Order completed successful' })
+  @ApiUnprocessableEntityResponse({ description: 'Order already captured' })
   async success(@Query('token') token: string) {
     const order = await this.ordersService.captureOrder(token);
     return {
@@ -51,8 +66,9 @@ export class PaymentsController {
    * @returns Mensaje de cancelación.
    */
   @Get('cancel-order')
-  cancel() {
-    return { message: 'Payment cancelled' };
+  @ApiOperation({ summary: 'Order cancelled' })
+  cancel(@Query('token') token: string) {
+    return { message: `Order cancelled by ID: ${token}` };
   }
 
   /**
@@ -62,6 +78,9 @@ export class PaymentsController {
    * @returns Mensaje de éxito.
    */
   @Post('payment-notification')
+  @ApiOperation({ summary: 'Payment notification' })
+  @ApiNoContentResponse({ description: 'Notification received' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   async notification(@Body() body: any): Promise<void> {
     if (body.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
       await this.paymentsService.processPayment(body);
@@ -73,6 +92,7 @@ export class PaymentsController {
    * @returns Datos del webhook creado.
    */
   @Post('webhooks')
+  @ApiOperation({ summary: 'Subscribe to payment events' })
   async stripeWebhook() {
     const webhook = await this.notificationsService.createWebhook();
     return { webhook };
@@ -83,6 +103,7 @@ export class PaymentsController {
    * @returns Lista de webhooks.
    */
   @Get('webhooks')
+  @ApiOperation({ summary: 'List all webhooks' })
   getWebhooks() {
     return this.notificationsService.getWebhooks();
   }
@@ -93,6 +114,7 @@ export class PaymentsController {
    * @returns Mensaje de éxito.
    */
   @Delete('webhooks/:id')
+  @ApiOperation({ summary: 'Delete a webhook' })
   async deleteWebhooks(@Param('id') id: string) {
     await this.notificationsService.deleteWebhook(id);
     return { message: 'Webhook deleted' };

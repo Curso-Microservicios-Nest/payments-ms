@@ -1,6 +1,12 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
-import { lastValueFrom } from 'rxjs';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 import { envs } from 'src/config';
 import { CreateOrderDto } from '../dto/create-order.dto';
@@ -41,7 +47,8 @@ export class OrdersService {
   }
 
   /**
-   * Permite capturar una orden de PayPal.
+   * Permite capturar una orden de PayPal. Solo se debe llamar después de que el
+   * usuario haya completado el pago y solo se puede capturar una vez.
    * @param orderId ID de la orden.
    * @returns Datos de la orden capturada.
    */
@@ -50,13 +57,21 @@ export class OrdersService {
     const url = `${envs.paypal.baseUrl}/v2/checkout/orders/${orderId}/capture`;
     const config = createAxiosConfig(accessToken);
     try {
-      const response = await lastValueFrom(
-        this.httpService.post(url, null, config),
+      const response = await firstValueFrom(
+        this.httpService.post(url, {}, config),
       );
       this.logger.log('Orden de PayPal capturada exitosamente.');
       return response.data;
     } catch (error) {
-      handleHttpError(error, this.logger);
+      if (error.response.data.details[0].issue === 'ORDER_ALREADY_CAPTURED') {
+        this.logger.warn('La orden ya fue capturada.');
+        throw new UnprocessableEntityException('La orden ya fue capturada.');
+      }
+      this.logger.error('Error al capturar la orden:', error.response.data);
+      throw new HttpException(
+        'Error al capturar la orden',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
