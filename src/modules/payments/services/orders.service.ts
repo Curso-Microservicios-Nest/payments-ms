@@ -43,6 +43,10 @@ export class OrdersService {
       ).href;
     } catch (error) {
       handleHttpError(error, this.logger);
+      throw new HttpException(
+        'Error al crear la orden de pago PayPal',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

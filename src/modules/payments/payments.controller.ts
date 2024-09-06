@@ -10,6 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import {
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -37,11 +38,12 @@ export class PaymentsController {
    * @returns URL de redirección para completar la orden.
    */
   @Post('create-order')
+  @MessagePattern('create.order')
   @ApiOperation({ summary: 'Create a new order' })
   @ApiCreatedResponse({ description: 'Order created successfully' })
-  async createOrder(@Body() createOrder: CreateOrderDto) {
-    const orderLink = await this.ordersService.createOrder(createOrder);
-    return { redirect: orderLink };
+  async createOrder(@Payload() createOrder: CreateOrderDto) {
+    const url = await this.ordersService.createOrder(createOrder);
+    return { url };
   }
 
   /**
