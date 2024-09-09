@@ -15,6 +15,7 @@ import {
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOperation,
+  ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
@@ -53,13 +54,13 @@ export class PaymentsController {
    */
   @Get('complete-order')
   @ApiOperation({ summary: 'Order completed' })
-  @ApiCreatedResponse({ description: 'Order completed successful' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Payment successful' })
   @ApiUnprocessableEntityResponse({ description: 'Order already captured' })
   async success(@Query('token') token: string) {
     const order = await this.ordersService.captureOrder(token);
     return {
       message: 'Payment successful',
-      data: { status: order.status, payer: order.payer },
+      data: { orderId: order.id, status: order.status, payer: order.payer },
     };
   }
 
@@ -69,13 +70,15 @@ export class PaymentsController {
    */
   @Get('cancel-order')
   @ApiOperation({ summary: 'Order cancelled' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Order cancelled' })
   cancel(@Query('token') token: string) {
     return { message: `Order cancelled by ID: ${token}` };
   }
 
   /**
    * Endpoint donde se notifica un pago realizado. Este endpoint es llamado
-   * por el webhook de PayPal.
+   * por el webhook de PayPal. Debe estar expuesto por SSL para que PayPal
+   * pueda enviar notificaciones.
    * @param body Datos de la notificación
    * @returns Mensaje de éxito.
    */
@@ -90,7 +93,8 @@ export class PaymentsController {
   }
 
   /**
-   * Permite suscribirse a eventos de pago de PayPal.
+   * Permite suscribirse a eventos de pago de PayPal. Se debe tener configurada la
+   * variable de entorno BASE_URL con SSL para que PayPal pueda enviar notificaciones.
    * @returns Datos del webhook creado.
    */
   @Post('webhooks')

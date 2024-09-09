@@ -12,6 +12,7 @@ import { envs } from 'src/config';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { createAxiosConfig, handleHttpError } from '../helpers/http.helper';
 import { createOrderPayload } from '../helpers/orders.helper';
+import { PayPalOrder } from '../interfaces/paypal-order.interface';
 import { AuthService } from './auth.service';
 
 @Injectable()
@@ -53,10 +54,10 @@ export class OrdersService {
   /**
    * Permite capturar una orden de PayPal. Solo se debe llamar después de que el
    * usuario haya completado el pago y solo se puede capturar una vez.
-   * @param orderId ID de la orden.
+   * @param orderId ID de la orden en PayPal.
    * @returns Datos de la orden capturada.
    */
-  async captureOrder(orderId: string) {
+  async captureOrder(orderId: string): Promise<PayPalOrder> {
     const accessToken = await this.authService.generateAccessToken();
     const url = `${envs.paypal.baseUrl}/v2/checkout/orders/${orderId}/capture`;
     const config = createAxiosConfig(accessToken);
@@ -64,8 +65,9 @@ export class OrdersService {
       const response = await firstValueFrom(
         this.httpService.post(url, {}, config),
       );
+      const order = response.data as PayPalOrder;
       this.logger.log('Orden de PayPal capturada exitosamente.');
-      return response.data;
+      return order;
     } catch (error) {
       if (error.response.data.details[0].issue === 'ORDER_ALREADY_CAPTURED') {
         this.logger.warn('La orden ya fue capturada.');

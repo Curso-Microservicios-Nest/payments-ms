@@ -5,6 +5,7 @@ import {
   IsArray,
   IsNotEmpty,
   IsString,
+  IsUUID,
   Length,
   ValidateNested,
 } from 'class-validator';
@@ -18,6 +19,7 @@ export class CreateOrderDto {
     example: 'order-123',
   })
   @IsString()
+  @IsUUID()
   @IsNotEmpty()
   orderId: string;
 
