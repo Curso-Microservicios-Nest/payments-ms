@@ -20,6 +20,7 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { PaymentNotification } from './interfaces/payment-notification.interface';
 import { NotificationsService } from './services/notifications.service';
 import { OrdersService } from './services/orders.service';
 import { PaymentsService } from './services/payments.service';
@@ -86,7 +87,7 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Payment notification' })
   @ApiNoContentResponse({ description: 'Notification received' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async notification(@Body() body: any): Promise<void> {
+  async notification(@Body() body: PaymentNotification): Promise<void> {
     if (body.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
       await this.paymentsService.processPayment(body);
     }

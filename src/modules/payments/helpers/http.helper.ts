@@ -1,4 +1,3 @@
-// src/payments/helpers/http-helper.ts
 import { Logger } from '@nestjs/common';
 import { AxiosRequestConfig } from 'axios';
 
