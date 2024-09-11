@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import {
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -40,12 +40,24 @@ export class PaymentsController {
    * @returns URL de redirección para completar la orden.
    */
   @Post('create-order')
-  @MessagePattern('create.order')
   @ApiOperation({ summary: 'Create a new order' })
   @ApiCreatedResponse({ description: 'Order created successfully' })
-  async createOrder(@Payload() createOrder: CreateOrderDto) {
+  async createOrder(@Body() createOrder: CreateOrderDto) {
     const url = await this.ordersService.createOrder(createOrder);
     return { url };
+  }
+
+  @MessagePattern('create.order')
+  async createOrderMS(@Payload() createOrder: CreateOrderDto) {
+    try {
+      const url = await this.ordersService.createOrder(createOrder);
+      return { url };
+    } catch (error) {
+      throw new RpcException({
+        statusCode: HttpStatus.BAD_GATEWAY,
+        message: error.message,
+      });
+    }
   }
 
   /**

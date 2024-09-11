@@ -10,7 +10,7 @@ import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 import { envs } from 'src/config';
 import { CreateOrderDto } from '../dto/create-order.dto';
-import { createAxiosConfig, handleHttpError } from '../helpers/http.helper';
+import { createAxiosConfig } from '../helpers/http.helper';
 import { createOrderPayload } from '../helpers/orders.helper';
 import { PayPalOrder } from '../interfaces/paypal-order.interface';
 import { AuthService } from './auth.service';
@@ -31,7 +31,7 @@ export class OrdersService {
    */
   async createOrder(data: CreateOrderDto) {
     const accessToken = await this.authService.generateAccessToken();
-    const url = `${envs.paypal.baseUrl}/v2/checkout/orders`;
+    const url = `${envs.paypal.baseUrl}/v2/checkout/orders222`;
     const body = createOrderPayload(data);
     const config = createAxiosConfig(accessToken);
     try {
@@ -43,10 +43,10 @@ export class OrdersService {
         (link: { rel: string }) => link.rel === 'payer-action',
       ).href;
     } catch (error) {
-      handleHttpError(error, this.logger);
+      this.logger.error(error);
       throw new HttpException(
-        'Error al crear la orden de pago PayPal',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        'Error processing payment. Please try again later',
+        HttpStatus.BAD_GATEWAY,
       );
     }
   }
