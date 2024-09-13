@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
-import { Services } from 'src/config';
+import { Services } from 'src/enums';
 import { PaidOrder } from '../interfaces/paid-order.interface';
 import { PaymentNotification } from '../interfaces/payment-notification.interface';
 
