@@ -31,7 +31,7 @@ export class OrdersService {
    */
   async createOrder(data: CreateOrderDto) {
     const accessToken = await this.authService.generateAccessToken();
-    const url = `${envs.paypal.baseUrl}/v2/checkout/orders222`;
+    const url = `${envs.paypal.baseUrl}/v2/checkout/orders`;
     const body = createOrderPayload(data);
     const config = createAxiosConfig(accessToken);
     try {

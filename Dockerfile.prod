@@ -1,0 +1,35 @@
+# 1. Dependencias
+FROM node:20.14.0-alpine3.20 AS deps
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+# 2. Compilar el proyecto
+FROM node:20.14.0-alpine3.20 AS build
+
+WORKDIR /usr/src/app
+
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY . .
+
+RUN npm run build
+RUN npm prune --omit=dev && npm cache clean --force
+
+# 3. Crear la imagen de Docker
+FROM node:20.14.0-alpine3.20 AS prod
+
+WORKDIR /usr/src/app
+
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+
+ENV PORT=3000
+
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "dist/main.js"]
